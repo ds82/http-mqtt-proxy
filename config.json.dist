@@ -1,0 +1,9 @@
+{
+  "mqtt": {
+    "clientId": "http-mqtt-proxy",
+    "url": "mqtt://localhost",
+    "port": 1883,
+    "username": "mqtt-user",
+    "password": "mqtt-password"
+  }
+}
