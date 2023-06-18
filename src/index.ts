@@ -1,7 +1,17 @@
 import Hapi from "@hapi/hapi";
 import { connect, MqttClient } from "mqtt";
 
-import config from "../config.json";
+//
+// CONFIG VIA ENV VARIABLES
+//
+const HTTP_HOST = process.env?.HTTP_HOST ?? "localhost";
+const HTTP_PORT = process.env?.HTTP_PORT ?? 3000;
+
+const MQTT_URL = process.env?.MQTT_URL ?? "mqtt://localhost:1883";
+const MQTT_USERNAME = process.env?.MQTT_USERNAME ?? "";
+const MQTT_PASSWORD = process.env?.MQTT_PASSWORD ?? "";
+const MQTT_CLIENTID = process.env?.MQTT_CLIENTID ?? "http-mqtt-proxy";
+//
 
 type InitHttpParams = {
   client: MqttClient;
@@ -18,14 +28,20 @@ const init = async () => {
 };
 
 const initMqtt = () => {
-  const client: MqttClient = connect(config.mqtt.url, {
-    clientId: config?.mqtt?.clientId ?? "http-mqtt-proxy",
-    username: config.mqtt.username,
-    password: config.mqtt.password,
+  console.log(`using mqtt-config`, {
+    url: MQTT_URL,
+    clientId: MQTT_CLIENTID,
+    username: MQTT_USERNAME,
+    password: MQTT_PASSWORD,
+  });
+  const client: MqttClient = connect(MQTT_URL, {
+    clientId: MQTT_CLIENTID,
+    username: MQTT_USERNAME,
+    password: MQTT_PASSWORD,
   });
 
   client.on("connect", () => {
-    console.log(`MQTT connected to ${config.mqtt.url}`);
+    console.log(`MQTT connected to ${MQTT_URL}`);
   });
 
   client.on("message", (topic, message) => {
@@ -41,8 +57,8 @@ const initMqtt = () => {
 
 const initHttp = async ({ client }: InitHttpParams) => {
   const server = Hapi.server({
-    port: 3000,
-    host: "localhost",
+    port: HTTP_PORT,
+    host: HTTP_HOST,
   });
 
   loadRoutes({ server, client });
